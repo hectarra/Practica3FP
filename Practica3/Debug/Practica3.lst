@@ -1,0 +1,141 @@
+
+Practica3.elf:     file format elf32-littlearm
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .data         00000020  0c000000  0c000000  00008000  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  1 .bss          00000028  0c000020  0c000020  00008020  2**0
+                  ALLOC
+  2 .text         000000b0  0c000048  0c000048  00008048  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  3 .ARM.attributes 00000022  00000000  00000000  000080f8  2**0
+                  CONTENTS, READONLY
+  4 .debug_line   00000067  00000000  00000000  0000811a  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   00000074  00000000  00000000  00008181  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 00000014  00000000  00000000  000081f5  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_aranges 00000020  00000000  00000000  00008210  2**3
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+0c000048 <start>:
+B:		.space 4*N
+
+.text
+start:
+		/*ldr sp, =_stack					@ Cargo pila*/
+		mov fp, #0						@ Cargamos un 0 al frame
+ c000048:	e3a0b000 	mov	fp, #0
+		mov r0, #0						@ Movemos un 0 a r0
+ c00004c:	e3a00000 	mov	r0, #0
+		ldr r1, =max					@ Leo la dir. de max
+ c000050:	e59f1090 	ldr	r1, [pc, #144]	; c0000e8 <fin>
+		str r0, [r1]					@ Escribo 0 en max
+ c000054:	e5810000 	str	r0, [r1]
+		mov r2, #N						@ Tiene el valor de N
+ c000058:	e3a02008 	mov	r2, #8
+		mov r4, #0						@ Escribo 0 en j
+ c00005c:	e3a04000 	mov	r4, #0
+
+0c000060 <for1>:
+
+for1:
+		cmp r4, r2						@ Si se cumple
+ c000060:	e1540002 	cmp	r4, r2
+		bge fin							@ Salta a fin
+ c000064:	aa00001f 	bge	c0000e8 <fin>
+		ldr r0, =A						@ Sino, cargame el puntero de A para la subrutina
+ c000068:	e59f007c 	ldr	r0, [pc, #124]	; c0000ec <fin+0x4>
+		bl max_int						@ Subrutina, nos devuelve el valor maximo
+ c00006c:	eb000008 	bl	c000094 <max_int>
+		mov r7, r0						@ Pasamos el valor a ind
+ c000070:	e1a07000 	mov	r7, r0
+		ldr r6, =A						@ Cargamos el puntero otra vez, r0 sobreescrito :,(
+ c000074:	e59f6070 	ldr	r6, [pc, #112]	; c0000ec <fin+0x4>
+		ldr r8, =B						@ Cargamos puntero de B
+ c000078:	e59f8070 	ldr	r8, [pc, #112]	; c0000f0 <fin+0x8>
+		ldr r9, [r6, r7, LSL #2]		@ Cargamos la posicion A[ind]
+ c00007c:	e7969107 	ldr	r9, [r6, r7, lsl #2]
+		str r9, [r8, r4, LSL #2]		@ Guardamos en B[j] A[ind]
+ c000080:	e7889104 	str	r9, [r8, r4, lsl #2]
+		mov r10, #0						@ Cargamos un 0 a r9
+ c000084:	e3a0a000 	mov	sl, #0
+		str r10, [r6, r7, LSL #2] 		@ Almacenamos un 0 a A[ind]
+ c000088:	e786a107 	str	sl, [r6, r7, lsl #2]
+		add r4, r4, #1					@ Cago en dios dos putas horas porque se me ha olvidado suma un uno!!! Que mala ostia TT
+ c00008c:	e2844001 	add	r4, r4, #1
+		b for1							@ Salto a for1
+ c000090:	eafffff2 	b	c000060 <for1>
+
+0c000094 <max_int>:
+
+		/* Comienzo subrutina max */
+
+max_int:
+		push {r5-r10, fp} 				@ Cargamos registros de la subrutina, no LR subrutina hoja
+ c000094:	e92d0fe0 	push	{r5, r6, r7, r8, r9, sl, fp}
+	/*	add fp, sp, #24					@ Desplazamos puntero de pila 4*7-4=24*/
+		mov r5, r0						@ Movemos puntero de A para no perderlo
+ c000098:	e1a05000 	mov	r5, r0
+		mov r6, #0						@ Inicializamos i
+ c00009c:	e3a06000 	mov	r6, #0
+		mov r7, r1						@ Cargamos max
+ c0000a0:	e1a07001 	mov	r7, r1
+		mov r8, #0						@ Movemos un 0
+ c0000a4:	e3a08000 	mov	r8, #0
+		str r8, [r7]					@ Para cargarlo en max
+ c0000a8:	e5878000 	str	r8, [r7]
+		ldr r9, =ind					@ Cargamos ind
+ c0000ac:	e59f9040 	ldr	r9, [pc, #64]	; c0000f4 <fin+0xc>
+		str r8, [r9]					@ Y le cargamos un fucking 0
+ c0000b0:	e5898000 	str	r8, [r9]
+
+0c0000b4 <for2>:
+
+for2:
+		cmp r6, r2						@ Comparamos i con N
+ c0000b4:	e1560002 	cmp	r6, r2
+		bge fin_sub						@ Si cumple salta al final de la subrutina
+ c0000b8:	aa000007 	bge	c0000dc <fin_sub>
+		ldr r8, [r5, r6, LSL #2]		@ Si no me cargas A[i]
+ c0000bc:	e7958106 	ldr	r8, [r5, r6, lsl #2]
+		ldr r10, [r7]					@ Cargamos a otro registro el valor de max
+ c0000c0:	e597a000 	ldr	sl, [r7]
+
+0c0000c4 <if>:
+if:		cmp r8, r10						@ Y me comparas A[i] con max
+ c0000c4:	e158000a 	cmp	r8, sl
+		ble fin_if						@ Si no cumple salta al final del if
+ c0000c8:	da000001 	ble	c0000d4 <fin_if>
+		str r8, [r7] 					@ Pero si se cumple, me pasas a max el valor de A[i]
+ c0000cc:	e5878000 	str	r8, [r7]
+		str r6, [r9]					@ Y me llevas i a ind
+ c0000d0:	e5896000 	str	r6, [r9]
+
+0c0000d4 <fin_if>:
+
+fin_if:
+		add r6, r6, #1					@ Sumamos uno a i
+ c0000d4:	e2866001 	add	r6, r6, #1
+		b for2							@ Saltamos al inicio del bucle
+ c0000d8:	eafffff5 	b	c0000b4 <for2>
+
+0c0000dc <fin_sub>:
+
+fin_sub:
+		ldr r0, [r9]					@ Cargamos a r0 el resultado
+ c0000dc:	e5990000 	ldr	r0, [r9]
+		pop {r5-r10, fp}				@ Devolvemos pila
+ c0000e0:	e8bd0fe0 	pop	{r5, r6, r7, r8, r9, sl, fp}
+		mov pc, lr
+ c0000e4:	e1a0f00e 	mov	pc, lr
+
+0c0000e8 <fin>:
+ c0000e8:	0c000020 	.word	0x0c000020
+ c0000ec:	0c000000 	.word	0x0c000000
+ c0000f0:	0c000028 	.word	0x0c000028
+ c0000f4:	0c000024 	.word	0x0c000024

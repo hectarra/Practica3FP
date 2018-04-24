@@ -1,0 +1,131 @@
+   1              	# 1 "../Practica3.asm"
+   1              	/*
+   0              	
+   0              	
+   0              	
+   2              	 * Practica3.asm
+   3              	 *
+   4              	 *  Created on: 24/04/2018
+   5              	 *      Author: usuario_local
+   6              	 */
+   7              	
+   8              	/*-----------------------------------------------------------------
+   9              	**
+  10              	**  Fichero:
+  11              	**    pract3a.asm  10/6/2014
+  12              	**
+  13              	**    Fundamentos de Computadores
+  14              	**    Dpto. de Arquitectura de Computadores y Automática
+  15              	**    Facultad de Informática. Universidad Complutense de Madrid
+  16              	**
+  17              	**  Propósito:
+  18              	**    Ordena de mayor a menor un vector de enteros positivos
+  19              	**
+  20              	**  Notas de diseño:
+  21              	**    Utiliza una subrutina que devuelve la posición del valor
+  22              	**    máximo de un vector de enteros positivos
+  23              	**
+  24              	**---------------------------------------------------------------*/
+  25              	
+  26              	.global start
+  27              	
+  28              	.EQU 	N, 8
+  29              	
+  30              	.data
+  31 0000 07000000 	A: 		.word 7,3,25,4,75,2,1,1
+  31      03000000 
+  31      19000000 
+  31      04000000 
+  31      4B000000 
+  32              	
+  33              	.bss
+  34 0000 00000000 	max: 	.space 4
+  35 0004 00000000 	ind:	.space 4
+  36 0008 00000000 	B:		.space 4*N
+  36      00000000 
+  36      00000000 
+  36      00000000 
+  36      00000000 
+  37              	
+  38              	.text
+  39              	start:
+  40              			/*ldr sp, =_stack					@ Cargo pila*/
+  41 0000 00B0A0E3 			mov fp, #0						@ Cargamos un 0 al frame
+  42 0004 0000A0E3 			mov r0, #0						@ Movemos un 0 a r0
+  43 0008 90109FE5 			ldr r1, =max					@ Leo la dir. de max
+  44 000c 000081E5 			str r0, [r1]					@ Escribo 0 en max
+  45 0010 0820A0E3 			mov r2, #N						@ Tiene el valor de N
+  46 0014 0040A0E3 			mov r4, #0						@ Escribo 0 en j
+  47              	
+  48              	for1:
+  49 0018 020054E1 			cmp r4, r2						@ Si se cumple
+  50 001c 1F0000AA 			bge fin							@ Salta a fin
+  51 0020 7C009FE5 			ldr r0, =A						@ Sino, cargame el puntero de A para la subrutina
+  52 0024 080000EB 			bl max_int						@ Subrutina, nos devuelve el valor maximo
+  53 0028 0070A0E1 			mov r7, r0						@ Pasamos el valor a ind
+  54 002c 70609FE5 			ldr r6, =A						@ Cargamos el puntero otra vez, r0 sobreescrito :,(
+  55 0030 70809FE5 			ldr r8, =B						@ Cargamos puntero de B
+  56 0034 079196E7 			ldr r9, [r6, r7, LSL #2]		@ Cargamos la posicion A[ind]
+  57 0038 049188E7 			str r9, [r8, r4, LSL #2]		@ Guardamos en B[j] A[ind]
+  58 003c 00A0A0E3 			mov r10, #0						@ Cargamos un 0 a r9
+  59 0040 07A186E7 			str r10, [r6, r7, LSL #2] 		@ Almacenamos un 0 a A[ind]
+  60 0044 014084E2 			add r4, r4, #1					@ Cago en dios dos putas horas porque se me ha olvidado suma un uno!!! Que mal
+  61 0048 F2FFFFEA 			b for1							@ Salto a for1
+  62              	
+  63              			/* Comienzo subrutina max */
+  64              	
+  65              	max_int:
+  66 004c E00F2DE9 			push {r5-r10, fp} 				@ Cargamos registros de la subrutina, no LR subrutina hoja
+  67              		/*	add fp, sp, #24					@ Desplazamos puntero de pila 4*7-4=24*/
+  68 0050 0050A0E1 			mov r5, r0						@ Movemos puntero de A para no perderlo
+  69 0054 0060A0E3 			mov r6, #0						@ Inicializamos i
+  70 0058 0170A0E1 			mov r7, r1						@ Cargamos max
+  71 005c 0080A0E3 			mov r8, #0						@ Movemos un 0
+  72 0060 008087E5 			str r8, [r7]					@ Para cargarlo en max
+  73 0064 40909FE5 			ldr r9, =ind					@ Cargamos ind
+  74 0068 008089E5 			str r8, [r9]					@ Y le cargamos un fucking 0
+  75              	
+  76              	for2:
+  77 006c 020056E1 			cmp r6, r2						@ Comparamos i con N
+  78 0070 070000AA 			bge fin_sub						@ Si cumple salta al final de la subrutina
+  79 0074 068195E7 			ldr r8, [r5, r6, LSL #2]		@ Si no me cargas A[i]
+  80 0078 00A097E5 			ldr r10, [r7]					@ Cargamos a otro registro el valor de max
+  81 007c 0A0058E1 	if:		cmp r8, r10						@ Y me comparas A[i] con max
+  82 0080 010000DA 			ble fin_if						@ Si no cumple salta al final del if
+  83 0084 008087E5 			str r8, [r7] 					@ Pero si se cumple, me pasas a max el valor de A[i]
+  84 0088 006089E5 			str r6, [r9]					@ Y me llevas i a ind
+  85              	
+  86              	fin_if:
+  87 008c 016086E2 			add r6, r6, #1					@ Sumamos uno a i
+  88 0090 F5FFFFEA 			b for2							@ Saltamos al inicio del bucle
+  89              	
+  90              	fin_sub:
+  91 0094 000099E5 			ldr r0, [r9]					@ Cargamos a r0 el resultado
+  92 0098 E00FBDE8 			pop {r5-r10, fp}				@ Devolvemos pila
+  93 009c 0EF0A0E1 			mov pc, lr
+  94              	
+  95              	fin:
+  96 00a0 00000000 			.end
+  96      00000000 
+  96      08000000 
+  96      04000000 
+DEFINED SYMBOLS
+    ../Practica3.asm:39     .text:00000000 start
+    ../Practica3.asm:28     *ABS*:00000008 N
+    ../Practica3.asm:31     .data:00000000 A
+    ../Practica3.asm:34     .bss:00000000 max
+    ../Practica3.asm:34     .bss:00000000 $d
+    ../Practica3.asm:35     .bss:00000004 ind
+    ../Practica3.asm:36     .bss:00000008 B
+    ../Practica3.asm:41     .text:00000000 $a
+    ../Practica3.asm:48     .text:00000018 for1
+    ../Practica3.asm:95     .text:000000a0 fin
+    ../Practica3.asm:65     .text:0000004c max_int
+    ../Practica3.asm:76     .text:0000006c for2
+    ../Practica3.asm:90     .text:00000094 fin_sub
+    ../Practica3.asm:81     .text:0000007c if
+    ../Practica3.asm:86     .text:0000008c fin_if
+    ../Practica3.asm:96     .text:000000a0 $d
+                   .debug_aranges:0000000c $d
+
+NO UNDEFINED SYMBOLS
