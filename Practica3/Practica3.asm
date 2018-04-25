@@ -1,25 +1,18 @@
-/*
- * Practica3.asm
- *
- *  Created on: 24/04/2018
- *      Author: usuario_local
- */
-
 /*-----------------------------------------------------------------
 **
 **  Fichero:
 **    pract3a.asm  10/6/2014
 **
 **    Fundamentos de Computadores
-**    Dpto. de Arquitectura de Computadores y Autom�tica
-**    Facultad de Inform�tica. Universidad Complutense de Madrid
+**    Dpto. de Arquitectura de Computadores y Automática
+**    Facultad de Informática. Universidad Complutense de Madrid
 **
-**  Prop�sito:
+**  Propósito:
 **    Ordena de mayor a menor un vector de enteros positivos
 **
-**  Notas de dise�o:
-**    Utiliza una subrutina que devuelve la posici�n del valor
-**    m�ximo de un vector de enteros positivos
+**  Notas de diseño:
+**    Utiliza una subrutina que devuelve la posición del valor
+**    máximo de un vector de enteros positivos
 **
 **---------------------------------------------------------------*/
 
@@ -37,17 +30,16 @@ B:		.space 4*N
 
 .text
 start:
-		/*ldr sp, =_stack					@ Cargo pila*/
 		mov fp, #0						@ Cargamos un 0 al frame
 		mov r0, #0						@ Movemos un 0 a r0
 		ldr r1, =max					@ Leo la dir. de max
 		str r0, [r1]					@ Escribo 0 en max
-		mov r2, #N						@ Tiene el valor de N
+		mov r1, #N						@ Tiene el valor de N
 		mov r4, #0						@ Escribo 0 en j
 
 for1:
-		cmp r4, r2						@ Si se cumple
-		bge fin							@ Salta a fin
+		cmp r4, r1					@ Si se cumple
+		bge for3							@ Salta a fin
 		ldr r0, =A						@ Sino, cargame el puntero de A para la subrutina
 		bl max_int						@ Subrutina, nos devuelve el valor maximo
 		mov r7, r0						@ Pasamos el valor a ind
@@ -55,9 +47,9 @@ for1:
 		ldr r8, =B						@ Cargamos puntero de B
 		ldr r9, [r6, r7, LSL #2]		@ Cargamos la posicion A[ind]
 		str r9, [r8, r4, LSL #2]		@ Guardamos en B[j] A[ind]
-		mov r10, #0						@ Cargamos un 0 a r9
+		mov r10, #0						@ Cargamos un 0 a r10
 		str r10, [r6, r7, LSL #2] 		@ Almacenamos un 0 a A[ind]
-		add r4, r4, #1					@ Cago en dios dos putas horas porque se me ha olvidado suma un uno!!! Que mala ostia TT
+		add r4, r4, #1					@ Sumo 1
 		b for1							@ Salto a for1
 
 		/* Comienzo subrutina max */
@@ -74,7 +66,7 @@ max_int:
 		str r8, [r9]					@ Y le cargamos un fucking 0
 
 for2:
-		cmp r6, r2						@ Comparamos i con N
+		cmp r6, r1						@ Comparamos i con N
 		bge fin_sub						@ Si cumple salta al final de la subrutina
 		ldr r8, [r5, r6, LSL #2]		@ Si no me cargas A[i]
 		ldr r10, [r7]					@ Cargamos a otro registro el valor de max
@@ -92,5 +84,32 @@ fin_sub:
 		pop {r5-r10, fp}				@ Devolvemos pila
 		mov pc, lr
 
+for3:
+		cmp r10, r1						@ R10 es nuestra i, comparamos con tamaño
+		bge	fin							@ Si se cumple salta a fin
+		ldr r9, [r8, r10, LSL #2]		@ Me cargas B[i]
+		str r9, [r6, r10, LSL #2]		@ Me almacenas B[i] a A[i]
+		add r10, r10, #1				@ Sumame uno a la i
+		b for3
+
+
+/*sub3:
+		push {r4-r8, fp}
+		mov r4, r0						@ Puntero de A
+		mov r5, r1						@ Tamaño puntero
+		mov r6, r2						@ Puntero de B
+		mov r7, #0						@ Inicializamos i
+for4:	cmp r7, r5
+		bge fin_sub1
+		ldr r8, [r6, r7, LSL #2]
+		str r8, [r4, r7, LSL #2]
+		add r7, r7, #1
+		b for4
+
+fin_sub1:
+		pop {r4-r8, fp}
+*/
+
 fin:
+
 		.end
